@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Steam云激活</title>
+    <!-- style -->
+    <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/spectre.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/spectre-icons.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- script -->
+</head>
+
+<body>
+<div class="container">
+    <div class="columns">
+        <div class="column col-xs-12 col-8 col-mx-auto">
+            <h3 class="site-title badge" data-badge="V2">
+                <a href="{{ url_for('.index') }}" target="_blank">Steam雲激活</a>
+            </h3>
+            <div class="columns">
+                <div class="column col-sm-12 col-md-12 col-6 col-mx-auto">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title h5 text-gray">
+                                <i class="icon icon-link"></i>
+                                服务器信息
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p>服务器名称：
+                                <mark id="text-server-name">未连接</mark>
+                            </p>
+                            连接状态：
+                            <span class="label label-warning label-rounded" id="server-status-connecting"
+                                  style="display: none">
+                                    <i class="icon icon-resize-horiz"></i> 连接中
+                                </span>
+                            <span class="label label-success label-rounded" id="server-status-connected"
+                                  style="display: none">
+                                    <i class="icon icon-check"></i> 已连接
+                                </span>
+                            <span class="label label-error label-rounded" id="server-status-disconnected">
+                                    <i class="icon icon-cross"></i> 已断开
+                                </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="column col-sm-12 col-md-12 col-6 col-mx-auto">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title h5 text-gray">
+                                <i class="icon icon-people"></i> 账号信息
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p>Steam用户名：
+                                <u>
+                                    <i id="userinfo-nickname">请先登录</i>
+                                </u>
+                            </p>
+                            IP地理位置：
+                            <span class="label label-rounded tooltip tooltip-bottom" id="userinfo-location"
+                                  data-tooltip="该区域仅决定您是否能游玩锁运行的游戏，&#13;&#10;与能否激活该区域的Key无关。">
+                                    ——
+                                </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal modal-sm" id="authcode-modal">
+                <a class="modal-overlay" aria-label="Close"></a>
+                <div class="modal-container">
+                    <div class="modal-header">
+                        <div class="modal-title h5">🔑 请输入验证码</div>
+                    </div>
+                    <div class="modal-body">
+                        <div class="content">
+                            <form>
+                                <div class="form-group">
+                                    <label class="form-label">手机(或邮箱)令牌:</label>
+                                    <input class="form-input" type="text" id="input-authcode-modal">
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="text-center">
+                            <button class="btn" id="button-authcode">确 定</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="toast toast-primary text-center" id="toast-info-wrapper">
+                    <span id="toast-info">
+                        <i class="icon icon-downward"></i>
+                        欢迎使用云激活~ 请先登录Steam账号
+                        <i class="icon icon-downward"></i>
+                    </span>
+            </div>
+            <div class="toast toast-primary text-center" id="toast-donate" style="display: none">
+                哟~激活成功了呢，真棒!
+            </div>
+
+            <div id="form-login">
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <div class="col-3">
+                            <label class="form-label">Username</label>
+                        </div>
+                        <div class="col-9 has-icon-left">
+                            <input class="form-input" type="text" id="input-username" placeholder="用户名(非昵称)">
+                            <i class="form-icon icon icon-people"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-3">
+                            <label class="form-label">Password</label>
+                        </div>
+                        <div class="col-9 has-icon-left">
+                            <input class="form-input" type="password" id="input-password" placeholder="密码">
+                            <i class="form-icon icon icon-apps"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-3">
+                            <label class="form-label">AuthCode</label>
+                        </div>
+                        <div class="col-9  has-icon-left">
+                            <input class="form-input" type="text" id="input-authcode" placeholder="手机令牌(若为邮箱验证码请留空)">
+                            <i class="form-icon icon icon-more-horiz"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+
+                        <div class="columns col-mx-auto">
+                            <button class="btn" id="button-login" disabled="disabled">
+                                <i class="icon icon-check"></i> 登录Steam
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="form-redeem" style="display: none">
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <label class="form-label">Steam Key</label>
+                        <textarea class="form-input" rows="3" placeholder="支持批量激活并自动识别文本中的Key"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="columns col-mx-auto">
+                            <button class="btn badge" data-badge="0" id="button-redeem" disabled="disabled">
+                                <i class="icon icon-forward"></i> 激活KEY
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <br>
+
+            <div id="redeem-records" class="container" style="display: none;">
+                <table class="table table-striped table-hover table-scroll">
+                    <h4 class="text-center text-gray">
+                        # 激活记录
+                        <button class="btn btn-error btn-sm tooltip tooltip-right" data-tooltip="显示未使用的KEY"
+                                onclick="$('#modal-keys').addClass('active')">
+                            <i class="icon icon-menu"></i>
+                        </button>
+                    </h4>
+                    <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>Key</th>
+                        <th>状态</th>
+                        <th style="width: 100%">Info</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal modal-lg" id="modal-keys">
+                <a class="modal-overlay"></a>
+                <div class="modal-container">
+                    <div class="modal-header">
+                        <a class="btn btn-clear float-right" aria-label="Close"></a>
+                        <div class="modal-title h5">可能未使用的Key（不包含网络超时的）：</div>
+                    </div>
+                    <div class="modal-body">
+                        <div class="content">
+                            <ul id="list-keys">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <br>
+        </div>
+    </div>
+    <!-- /columns -->
+</div>
+    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+
+</html>
