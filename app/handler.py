@@ -17,6 +17,7 @@ class SocketHandler(object):
         self.serv_name = serv_name or 'Unknown'
         self.username = None
         self.password = None
+        self.count = 0
         self._LOG = logging.getLogger("SocketHandler")
 
     def init(self):
@@ -62,9 +63,8 @@ class SocketHandler(object):
             })
         elif result == EResult.OK:
             # login success
-            self._LOG.debug('Login steam success with %s' % self.username)
-            self.username = None
-            self.password = None
+            self._LOG.debug('Login steam success with %s' % repr(self.username))
+            del self.password
         else:
             self.send({
                 'action': 'logOn',
@@ -80,10 +80,15 @@ class SocketHandler(object):
         })
 
     def handle_ping(self, msg):
-        self.send({
-            'action': 'pong',
-            'count': msg.get('count', 0)
-        })
+        self.count += 1
+        if self.count > 20:
+            self._ws.close()
+            self.disconnect()
+        else:
+            self.send({
+                'action': 'pong',
+                'count': self.count
+            })
 
     def handle_redeem(self, msg):
         keys = msg.get('keys')
@@ -111,8 +116,6 @@ class SocketHandler(object):
                 'country': msg.body.ip_country
             }
         })
-        self.username = None
-        self.password = None
 
     @property
     def id(self):
@@ -124,7 +127,7 @@ class SocketHandler(object):
                 message = self._ws.receive()
                 message = json.loads(message)
             except (json.JSONDecodeError, TypeError) as err:
-                self._LOG.error('Got error message: %s', err)
+                self._LOG.error('Got error message: %s, %s', message, err)
                 break
 
             self._LOG.debug('receive message: %s', message)
