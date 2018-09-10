@@ -1,3 +1,6 @@
+[Steam-Key](https://github.com/zyfworks/steam-key) 的 Python 移植
+
+
 #### 安装 `uWSGI`
 
 只支持 `uWSGI` 作为 web server, `uWSGI` 需要 `OpenSSL` 才能支持 `WebSocket`, 所以要从源码安装 `uWSGI`
@@ -60,3 +63,5 @@ location / {
 
 
 
+### License
+Apache License
